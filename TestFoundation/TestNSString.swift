@@ -77,9 +77,11 @@ class TestNSString : XCTestCase {
             ("test_stringByResolvingSymlinksInPath", test_stringByResolvingSymlinksInPath),
             ("test_stringByExpandingTildeInPath", test_stringByExpandingTildeInPath),
             ("test_stringByStandardizingPath", test_stringByStandardizingPath),
+            ("test_stringByRemovingPercentEncoding", test_stringByRemovingPercentEncoding),
             ("test_ExternalRepresentation", test_ExternalRepresentation),
             ("test_mutableStringConstructor", test_mutableStringConstructor),
             ("test_PrefixSuffix", test_PrefixSuffix),
+            ("test_reflection", test_reflection),
         ]
     }
 
@@ -823,6 +825,13 @@ class TestNSString : XCTestCase {
             XCTAssertEqual(result, path.bridge(), "parent links could not be resolved for relative paths")
         }
     }
+
+    func test_stringByRemovingPercentEncoding() {
+        let s1 = "a%20b".stringByRemovingPercentEncoding
+        XCTAssertEqual(s1, "a b")
+        let s2 = "a%1 b".stringByRemovingPercentEncoding
+        XCTAssertNil(s2, "returns nil for a string with an invalid percent encoding")
+    }
     
     func test_ExternalRepresentation() {
         // Ensure NSString can be used to create an external data representation
@@ -1059,5 +1068,16 @@ extension TestNSString {
             XCTAssert(test.xfail == fail, "Unexpected \(test.xfail ?"success":"failure"): \(test.loc)")
         }
 #endif
+    }
+}
+
+func test_reflection() {
+    let testString: NSString = "some text here"
+    
+    let ql = PlaygroundQuickLook(reflecting: testString)
+
+    switch ql {
+    case .Text(let str): XCTAssertEqual(testString.bridge(), str)
+    default: XCTAssertTrue(false, "mismatched quicklook")
     }
 }
